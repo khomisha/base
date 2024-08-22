@@ -1,7 +1,6 @@
 
 // ignore_for_file: slash_for_doc_comments
 
-import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:multi_split_view/multi_split_view.dart';
@@ -486,25 +485,93 @@ class FieldStub extends StatelessWidget {
     }
 }
 
-class SwiperPanel extends StatelessWidget {
+class SwiperPanel extends StatefulWidget {
     final List< Widget > widgets;
+    final bool loop;
+    final double? iconSize;
+    late final void Function( bool ) changeDisablePrev;
+    late final void Function( bool ) changeDisableNext;
 
-    const SwiperPanel( { super.key, required this.widgets } );
-  
+    // ignore: prefer_const_constructors_in_immutables
+    SwiperPanel( { super.key, required this.widgets, this.loop = true, this.iconSize } );
+
     @override
-    Widget build(BuildContext context) {
-        return Swiper(
-            itemBuilder: ( BuildContext context, int index ) {
-                return widgets[ index ];
-            },
-            itemCount: widgets.length,
-            pagination: SwiperPagination( 
-                builder: DotSwiperPaginationBuilder( 
-                    activeColor: Style.theme.primaryColorDark, color: Style.theme.primaryColorLight 
+    State< SwiperPanel > createState( ) => _SwiperPanelState( );
+}
+
+class _SwiperPanelState extends State< SwiperPanel > {
+    int index = 0;
+    bool disablePrev = false;
+    bool disableNext = false;
+
+    @override
+    void initState( ) {
+        super.initState( );
+        widget.changeDisableNext = ( disable ) {
+            disableNext = disable;
+        };
+        widget.changeDisablePrev = ( disable ) {
+            disablePrev = disable;
+        };
+    }
+
+    @override
+    Widget build( BuildContext context ) {
+        var arrows = Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: < Widget > [
+                GestureDetector(
+                    onTap: ( ) { setState( _movePrev ); },
+                    child: Icon( 
+                        Icons.arrow_left, 
+                        size: widget.iconSize,
+                        color: disablePrev ? Style.theme.colorScheme.primaryFixedDim : Style.theme.primaryColor
+                    )
+                ),
+                GestureDetector(
+                    onTap: ( ) { setState( _moveNext ); },
+                    child: Icon( 
+                        Icons.arrow_right, 
+                        size: widget.iconSize,
+                        color: disableNext ? Style.theme.colorScheme.primaryFixedDim : Style.theme.primaryColor
+                    )
                 )
-            ),
-            control: const SwiperControl( ),
-        );  
+            ]
+        );
+        var stack = Stack( 
+            fit: StackFit.expand,
+            children: [ widget.widgets[ index ], SizedBox.expand( child: arrows ) ]
+        );
+        return stack;
+    }
+
+    void _movePrev( ) {
+        if( index == 0 ) {
+            if( widget.loop ) {
+                index = widget.widgets.length - 1;
+            }
+        } else {
+            if( index == 1 && !widget.loop ) { 
+                disablePrev = true;
+            }
+            disableNext = false;
+            index -= 1;
+        }
+    }
+
+    void _moveNext( ) {
+        if( index == widget.widgets.length - 1 ) {
+            if( widget.loop ) {
+                index = 0;
+            }
+        } else {
+            if( index == widget.widgets.length - 2 && !widget.loop ) {
+                disableNext = true;
+            }
+            disablePrev = false;
+            index += 1;
+        }
     }
 }
 
