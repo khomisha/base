@@ -16,14 +16,25 @@ class Config {
     static final String _fileName = path.join( 'assets', 'cfg', 'app_settings.json' );
 
     Config._( ) {
-        var file = File( _fileName );
-        _config = json.decode( file.readAsStringSync( ) );
+        try {
+            var file = File( _fileName );
+            _config = json.decode( file.readAsStringSync( ) );
+        }
+        on PathNotFoundException {
+            _config = < String, dynamic > { };
+            return;
+        }
     }
 }
 
 void writeConfig( ) {
-    var encoder = const JsonEncoder.withIndent( INDENT );
-    var file = File( Config._fileName );
-    file.writeAsStringSync( encoder.convert( Config.config ) );
+    try {
+        var encoder = const JsonEncoder.withIndent( INDENT );
+        var file = File( Config._fileName );
+        file.writeAsStringSync( encoder.convert( Config.config ) );
+    }
+    on PathNotFoundException {
+        return;
+    }
 }
 

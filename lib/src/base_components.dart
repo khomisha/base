@@ -489,8 +489,6 @@ class SwiperPanel extends StatefulWidget {
     final List< Widget > widgets;
     final bool loop;
     final double? iconSize;
-    late final void Function( bool ) changeDisablePrev;
-    late final void Function( bool ) changeDisableNext;
 
     // ignore: prefer_const_constructors_in_immutables
     SwiperPanel( { super.key, required this.widgets, this.loop = true, this.iconSize } );
@@ -501,18 +499,28 @@ class SwiperPanel extends StatefulWidget {
 
 class _SwiperPanelState extends State< SwiperPanel > {
     int index = 0;
+    int maxIndex = 0;
     bool disablePrev = false;
     bool disableNext = false;
 
     @override
     void initState( ) {
         super.initState( );
-        widget.changeDisableNext = ( disable ) {
-            disableNext = disable;
-        };
-        widget.changeDisablePrev = ( disable ) {
-            disablePrev = disable;
-        };
+        maxIndex = widget.widgets.length;
+        Functions.put( "changeMaxIndex", changeMaxIndex );
+    }
+
+    /**
+     * Changes maxIndex, 
+     * if bSet true set maxIndex to current index + 1, otherwise set maxIndex to widgets.length
+     */
+    void changeMaxIndex( bool bSet ) {
+        setState( 
+            ( ) { 
+                maxIndex = bSet ? index + 1 : widget.widgets.length;
+                disableNext = bSet;
+            } 
+        );
     }
 
     @override
@@ -549,7 +557,7 @@ class _SwiperPanelState extends State< SwiperPanel > {
     void _movePrev( ) {
         if( index == 0 ) {
             if( widget.loop ) {
-                index = widget.widgets.length - 1;
+                index = maxIndex - 1;
             }
         } else {
             if( index == 1 && !widget.loop ) { 
@@ -561,12 +569,12 @@ class _SwiperPanelState extends State< SwiperPanel > {
     }
 
     void _moveNext( ) {
-        if( index == widget.widgets.length - 1 ) {
+        if( index == maxIndex - 1 ) {
             if( widget.loop ) {
                 index = 0;
             }
         } else {
-            if( index == widget.widgets.length - 2 && !widget.loop ) {
+            if( index == maxIndex - 2 && !widget.loop ) {
                 disableNext = true;
             }
             disablePrev = false;

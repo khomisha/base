@@ -12,3 +12,7 @@ export 'src/splash_screen.dart';
 export 'src/style.dart';
 export 'src/util.dart';
 export 'src/widget_presenter.dart';
+export 'src/presenter.dart';
+export 'src/thread.dart';
+
+
