@@ -4,7 +4,7 @@
 /**
  * Arbitrary attribute map
  */
-abstract class AttributeMap< K, V >  implements Comparable {
+abstract class AttributeMap< K, V > implements Comparable {
     late Map< K, V > _attributes;
     
     AttributeMap( ) {

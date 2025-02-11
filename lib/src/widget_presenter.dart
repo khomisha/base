@@ -2,9 +2,10 @@
 // ignore_for_file: slash_for_doc_comments
 
 import 'package:flutter/material.dart';
+import 'notification.dart';
 import 'util.dart';
 
-abstract class WidgetPresenter extends ChangeNotifier {
+abstract class WidgetPresenter extends ChangeNotifier implements Subscriber {
     late String dataType;
     late int editIndex;
     late List< ListItem > _list;
@@ -61,7 +62,7 @@ abstract class WidgetPresenter extends ChangeNotifier {
     }
 
     /**
-     * Updates specified attribute of the editing data
+     * Updates specified attribute
      * attributeName the attribute name
      * newValue the new value
      * notify the notify flag
@@ -86,6 +87,9 @@ abstract class WidgetPresenter extends ChangeNotifier {
             notifyListeners( );
         }
     } 
+
+    @override
+    void receive( String event, { dynamic data } );
 
     /**
      * Selects specified item

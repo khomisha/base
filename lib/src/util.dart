@@ -1,21 +1,13 @@
 
 // ignore_for_file: slash_for_doc_comments, constant_identifier_names
 
-import 'dart:io';
+import 'file_web.dart' if( dart.library.io ) 'file_io.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/logger.dart';
 import 'package:intl/intl.dart';
 import "package:hex/hex.dart";
 import 'dart:convert';
 import 'package:path/path.dart' as path;
-import 'config.dart';
-
-const String INDENT = '    ';
-
-// result types
-const int SUCCESS = 0;
-const int FAILURE = 1;
-const int NO_ACTION = 2;
+import 'constants.dart';
 
 typedef FromString = dynamic Function( String value );
 
@@ -118,7 +110,7 @@ void sleep( Duration duration ) {
  * dirPath the directory path within current user directory
  */
 String getPathFromUserDir( String dirPath ) {
-    return path.join( Platform.environment[ 'HOME' ] ?? Platform.environment[ 'USERPROFILE' ]!, dirPath );
+    return path.join( FileImpl.userDir, dirPath );
 }
 
 /**
@@ -175,62 +167,6 @@ class ListItem implements Comparable {
     }
 }
 
-const String TEXT_FIELD = "TextFormField";
-const String DROPDOWN = "DropDownButton";
-const String CHECK_BOX = "CheckBox";
-const String RADIO = "Radio";
-const String SWITCH = "Switch";
-const String LIST_VIEW_FIELD = "ListView";
-const String CHIP_LIST_FIELD = "ChipListField";
-
-/**
- * Defines field pattern
- */
-class FieldPattern {
-    String? Function( String? value ) validator;
-    String? style;
-    double width;
-    String containerId;
-    Axis axis;
-    String label;
-
-    static String? _emptyValidator( String? value ) {
-        return null;
-    }
-
-    FieldPattern( 
-        { 
-            this.label = "",
-            this.validator = _emptyValidator, 
-            this.style, 
-            this.width = 130, 
-            this.containerId = "", 
-            this.axis = Axis.horizontal 
-        } 
-    );
-}
-
-const String ERR_MSG = "error_message";
-const String ERROR = "error";
-const String WARNING = "warning";
-const String NOTICE = "notice";
-const String STACK = "stack_trace";
-
-Logger logger = Logger( 
-    printer: PrettyPrinter( printEmojis: false, printTime: true, colors: false ),
-    output: FileOutput( file: File( createFileName( "logs", Config.config[ 'app_name' ], "log" ) ) )
-);
-
-void logOnErrorFlutter( FlutterErrorDetails details ) {
-    logger.e( details.exception.toString( ), error: details.exception, stackTrace: details.stack );
-}
-
-bool logOnErrorPlatform( Object error, StackTrace stack ) {
-    var err = error as Exception; 
-    logger.e( err.toString( ), error: err, stackTrace: stack );
-    return true;
-}
-
 /**
  * Console output specified object
  * jsonObject the object to output, must implement Map< String, dynamic > toJson() method 
@@ -240,23 +176,5 @@ void printObjectAsJson( String tag, dynamic jsonObject ) {
     debugPrint( tag );
     debugPrint( encoder.convert( jsonObject ) );
 }
-
-final Map< String, Color > colors = {
-    'red'  : Colors.red,
-    'blue' : Colors.blue,
-    'black': Colors.black,
-    'green': Colors.green,
-    'yellow': Colors.yellow,
-    'amber': Colors.amber,
-    'cyan': Colors.cyan,
-    'brown': Colors.brown,
-    'orange': Colors.orange,
-    'purple': Colors.purple,
-    'grey': Colors.grey,
-    'lime': Colors.lime,
-    'pink': Colors.pink
-};
-
-final guiColor = colors[ Config.config[ 'gui_primary_color' ] ] ?? Colors.blue;
 
 

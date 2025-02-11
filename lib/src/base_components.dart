@@ -1,5 +1,5 @@
 
-// ignore_for_file: slash_for_doc_comments
+// ignore_for_file: slash_for_doc_comments, constant_identifier_names
 
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -7,7 +7,6 @@ import 'package:multi_split_view/multi_split_view.dart';
 import 'package:provider/provider.dart';
 import 'injection_object.dart';
 import 'widget_presenter.dart';
-import 'facing.dart';
 import 'style.dart';
 import 'util.dart';
 
@@ -223,6 +222,60 @@ abstract class BaseForm< T extends WidgetPresenter > extends StatelessWidget {
     void edit( ) {
         agent.presenter.startEdit( 0 );
     }
+}
+
+const String TEXT_FIELD = "TextFormField";
+const String DROPDOWN = "DropDownButton";
+const String CHECK_BOX = "CheckBox";
+const String RADIO = "Radio";
+const String SWITCH = "Switch";
+const String LIST_VIEW_FIELD = "ListView";
+const String CHIP_LIST_FIELD = "ChipListField";
+
+/**
+ * Defines field pattern
+ */
+class FieldPattern {
+    String? Function( String? value ) validator;
+    String? style;
+    double width;
+    String containerId;
+    Axis axis;
+    String label;
+
+    static String? _emptyValidator( String? value ) {
+        return null;
+    }
+
+    FieldPattern( 
+        { 
+            this.label = "",
+            this.validator = _emptyValidator, 
+            this.style, 
+            this.width = 130, 
+            this.containerId = "", 
+            this.axis = Axis.horizontal 
+        } 
+    );
+}
+
+final _facing = < String, Map< String, FieldPattern > > { };
+
+/**
+ * Returns fields pattern set specified by key
+ * key the fields pattern set key 
+ */
+Map< String, FieldPattern > getPattern( String key ) {
+    return _facing[ key ] ?? < String, FieldPattern > { };
+}
+
+/**
+ * Adds new pattern for specified key
+ * key the fields pattern set key 
+ * pattern the fields pattern
+ */
+void addPattern( String key, Map< String, FieldPattern > pattern ) {
+    _facing[ key ] = pattern;
 }
 
 /**
