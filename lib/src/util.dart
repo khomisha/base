@@ -1,7 +1,7 @@
 
 // ignore_for_file: slash_for_doc_comments, constant_identifier_names
 
-import 'file_web.dart' if( dart.library.io ) 'file_io.dart';
+import 'file.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import "package:hex/hex.dart";
@@ -110,7 +110,7 @@ void sleep( Duration duration ) {
  * dirPath the directory path within current user directory
  */
 String getPathFromUserDir( String dirPath ) {
-    return path.join( FileImpl.userDir, dirPath );
+    return path.join( GenericFile.userDir, dirPath );
 }
 
 /**

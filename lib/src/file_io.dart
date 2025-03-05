@@ -14,11 +14,11 @@ class FileImpl implements GenericFile {
     }
 
     /**
-     *  see [File.readAsStringSync]
+     *  see [File.readAsString]
      */ 
     @override
-    String readString( ) {
-        return _file.readAsStringSync( );
+    Future< String > readString( ) async {
+        return await _file.readAsString();
     }
     
     /**

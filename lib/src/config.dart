@@ -18,7 +18,7 @@ class Config {
 
     Config._( ) {
         var file = GenericFile( _fileName );
-        _config = json.decode( file.readString( ) );
+        file.readString( ).then( ( value ) => _config = json.decode( value ) );
     }
 }
 
