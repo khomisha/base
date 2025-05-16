@@ -26,3 +26,8 @@ final Map< String, Color > colors = {
     'pink': Colors.pink
 };
 
+const String ERR_MSG = "error_message";
+const String ERROR = "error";
+const String WARNING = "warning";
+const String NOTICE = "notice";
+const String STACK = "stack_trace";

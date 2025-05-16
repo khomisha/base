@@ -6,7 +6,7 @@
  */
 abstract class AttributeMap< K, V > implements Comparable {
     late Map< K, V > _attributes;
-    
+     
     AttributeMap( ) {
        _attributes = < K, V > { }; 
     }
@@ -20,6 +20,7 @@ abstract class AttributeMap< K, V > implements Comparable {
     }
     operator []=( K key, V value ) { _attributes[ key ] = value; }
     Map< K, V > get attributes => _attributes;
+    set attributes( Map< K, V > value ) => this._attributes = value;
 
     dynamic copy( );
 }

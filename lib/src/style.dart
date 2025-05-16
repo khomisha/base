@@ -34,7 +34,7 @@ class Style {
             borderSide: BorderSide( color: theme.primaryColor.withOpacity( 0.45 ) ),
             borderRadius: borderRadius
         ),
-        labelStyle: theme.textTheme.headlineSmall,
+        labelStyle: theme.textTheme.labelLarge,
         errorBorder: OutlineInputBorder(
             borderSide: const BorderSide( color: Colors.pink ),
             borderRadius: borderRadius
@@ -42,9 +42,9 @@ class Style {
     );
     static final TextStyle listTileStyle = theme.textTheme.titleMedium!;
     static final DividerPainter divPainter = DividerPainters.grooved1( backgroundColor: theme.primaryColor );
-    static final TextStyle formFieldStyle = theme.textTheme.bodyLarge!;
-    static final TextStyle fieldStyle = theme.textTheme.bodyLarge!;
-    static final TextStyle fieldLabelStyle = theme.textTheme.titleLarge!;
+    static final TextStyle formFieldStyle = theme.textTheme.bodyMedium!;
+    static final TextStyle fieldStyle = theme.textTheme.bodyMedium!;
+    static final TextStyle fieldLabelStyle = theme.textTheme.labelLarge!;
     static final ButtonStyle styleButton = ElevatedButton.styleFrom( 
         minimumSize: const Size( 89.0, 50.0 ), 
         textStyle: listTileStyle 

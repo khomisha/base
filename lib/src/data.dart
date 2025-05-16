@@ -10,6 +10,10 @@ class Data extends AttributeMap< String, dynamic > {
 
     Data( );
 
+    Data.fromMap( Map< String, dynamic > map ) {
+        attributes = map;
+    }
+
     @override
     int compareTo( other ) {
         if( other is! Data ) {

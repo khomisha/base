@@ -1,20 +1,36 @@
 
+// ignore_for_file: avoid_print
+
+import 'data.dart';
+import 'electron_api.dart';
 import 'notification.dart';
 import 'presenter.dart';
+import 'package:js_interop_utils/js_interop_utils.dart';
 
+/**
+ * Broker for sending messages between presenter and model
+ */
 abstract class Broker extends Publisher implements Presenter {
-    late dynamic handler;
 
-    Broker( this.handler );
+    Broker( );
 
     @override
     void dispose( ) {
     }
 
     @override
-    void send( dynamic data ) {
+    void send( Data data ) async {
+        await electronAPI.sendMessage( data.attributes.toJSDeep ).toDart.then( 
+            ( value ) { 
+                var map = < String, dynamic >{ };
+                for( var key in value.keys ) {
+                    map[ key ] = value.get( key );
+                }
+                update( Data.fromMap( map ) );
+            } 
+        );
     }
 
     @override
-    void update( dynamic data );
+    void update( Data data );
 }

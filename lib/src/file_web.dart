@@ -3,21 +3,30 @@
 import 'dart:js_interop';
 import 'electron_api.dart';
 import 'file.dart';
+import 'package:path/path.dart' as path;
 
+/**
+ * File object web implementation
+ */
 class FileImpl implements GenericFile {
-    final String name;
+    final String fileName;
     static String userDir = electronAPI.getUserDir( ).toDart;
+    static String appDir = electronAPI.getAppDir( ).toDart;
+    static String assetsDir = path.join( appDir, 'assets' );
 
-    FileImpl( this.name );
+    /**
+     * fileName the full file name
+     */
+    FileImpl( this.fileName );
 
     @override
     Future< String > readString( ) async {
-        var content = await electronAPI.readFile( name.toJS ).toDart.then( ( value ) => value.toDart );
+        var content = await electronAPI.readFile( fileName.toJS ).toDart.then( ( value ) => value.toDart );
         return content;
     }
 
     @override
-    void writeString( String content ) {
-        electronAPI.writeFile( name.toJS, content.toJS );
+    void writeString( String content, { int mode = 1 } ) async {
+        await electronAPI.writeFile( fileName.toJS, content.toJS, mode.toJS ).toDart;
     }
 }

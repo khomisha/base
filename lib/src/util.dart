@@ -79,12 +79,12 @@ String fromHex( String hex ) {
 
 /**
  * Returns current datetime as string
- * format the date time format, at the moment only dd.mm.yy is supported  
+ * pattern the date time pattern
  */
-String currentDatetime( { String? format } ) {
+String currentDatetime( { String? pattern } ) {
     var dt = DateTime.now( );
-    if( format != null ) {
-        return DateFormat( format).format( dt );
+    if( pattern != null ) {
+        return DateFormat( pattern ).format( dt );
     } else {
         return '${ dt.year }${ dt.month }${ dt.day }${ dt.hour }${ dt.minute }${ dt.second }';
     }
@@ -106,24 +106,17 @@ void sleep( Duration duration ) {
 }
 
 /**
- * Returns path for specified directory within current user directory
- * dirPath the directory path within current user directory
- */
-String getPathFromUserDir( String dirPath ) {
-    return path.join( GenericFile.userDir, dirPath );
-}
-
-/**
  * Creates file name 
  * dirPath the directory path within current user directory
- * version the file version
  * name the meaningful file name
  * ext the file extension
+ * version the file version
+ * pattern the date time pattern using in file name as label
  */
-String createFileName( String dirPath, String name, String ext, { String? version } ) {
+String createFileName( String dirPath, String name, String ext, { String? version, String? pattern } ) {
     var fileName = version == null ? 
-        path.join( getPathFromUserDir( dirPath ), "${name}_${currentDatetime( )}.$ext" ) :
-        path.join( getPathFromUserDir( dirPath ), "${name}_${version}_${currentDatetime( )}.$ext" );
+        path.join( GenericFile.userDir, dirPath, "${name}_${currentDatetime( pattern: pattern )}.$ext" ) :
+        path.join( GenericFile.userDir, dirPath , "${name}_${version}_${currentDatetime( pattern: pattern )}.$ext" );
     return fileName;
 }
 
@@ -139,6 +132,9 @@ class Functions {
      * Returns specified function
      */
     static T get< T >( String key ) {
+        if( _map[ key ] == null ) {
+            throw Exception( 'Function $key not found' );
+        }
         return _map[ key ] as T;
     }
 
@@ -168,7 +164,7 @@ class ListItem implements Comparable {
 }
 
 /**
- * Console output specified object
+ * Specified object console output 
  * jsonObject the object to output, must implement Map< String, dynamic > toJson() method 
  */
 void printObjectAsJson( String tag, dynamic jsonObject ) {
