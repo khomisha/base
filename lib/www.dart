@@ -1,4 +1,4 @@
-library web;
+library www;
 
 export 'src/attribute_map.dart';
 export 'src/style.dart';
@@ -15,4 +15,5 @@ export 'src/logger.dart';
 export 'src/widget_presenter.dart';
 export 'src/presenter.dart';
 export 'src/notification.dart';
+export 'src/pane.dart';
 
