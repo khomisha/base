@@ -31,3 +31,7 @@ const String ERROR = "error";
 const String WARNING = "warning";
 const String NOTICE = "notice";
 const String STACK = "stack_trace";
+
+// events
+const String UPDATE = "update";
+

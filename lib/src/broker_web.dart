@@ -3,14 +3,13 @@
 
 import 'data.dart';
 import 'electron_api.dart';
-import 'notification.dart';
 import 'presenter.dart';
 import 'package:js_interop_utils/js_interop_utils.dart';
 
 /**
  * Broker for sending messages between presenter and model
  */
-abstract class Broker extends Publisher implements Presenter {
+abstract class Broker implements Presenter {
 
     Broker( );
 

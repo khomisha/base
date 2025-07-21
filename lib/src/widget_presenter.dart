@@ -2,11 +2,13 @@
 // ignore_for_file: slash_for_doc_comments
 
 import 'package:flutter/material.dart';
+import 'attribute_map.dart';
+import 'constants.dart';
 import 'notification.dart';
 import 'util.dart';
 
 abstract class WidgetPresenter extends ChangeNotifier implements Subscriber {
-    late String dataType;
+    final String dataType;
     late int editIndex;
     late List< ListItem > _list;
     List< ListItem > get list => _list;
@@ -19,6 +21,8 @@ abstract class WidgetPresenter extends ChangeNotifier implements Subscriber {
     }
     bool readOnly = true;
     bool adding = false;
+
+    WidgetPresenter( this.dataType );
 
     /**
      * Adds empty data
@@ -89,7 +93,12 @@ abstract class WidgetPresenter extends ChangeNotifier implements Subscriber {
     } 
 
     @override
-    void receive( String event, { dynamic data } );
+    void onEvent( Event event ) {
+        if( event.type == UPDATE && event.data != null ) {
+            var data = event.data as AttributeMap;
+            list = data.attributes[ dataType ];
+        }
+    }
 
     /**
      * Selects specified item

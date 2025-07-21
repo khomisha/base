@@ -10,8 +10,3 @@ extension type AppElectronAPI._( JSObject _ ) implements JSObject {
 
 @JS( )
 external AppElectronAPI get appElectronAPI;
-
-@staticInterop
-extension type JSError( JSObject _ ) implements JSObject {
-    external String get message;
-}

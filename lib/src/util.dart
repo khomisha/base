@@ -106,18 +106,26 @@ void sleep( Duration duration ) {
 }
 
 /**
- * Creates file name 
+ * Creates file system entity name 
  * dirPath the directory path within current user directory
- * name the meaningful file name
- * ext the file extension
- * version the file version
- * pattern the date time pattern using in file name as label
+ * name the meaningful entity name
+ * ext the entity extension
+ * version the entity version
+ * pattern the date time pattern using in entity name as label
+ * addon the arbitrary addon for entity full name, directory only
  */
-String createFileName( String dirPath, String name, String ext, { String? version, String? pattern } ) {
-    var fileName = version == null ? 
-        path.join( GenericFile.userDir, dirPath, "${name}_${currentDatetime( pattern: pattern )}.$ext" ) :
-        path.join( GenericFile.userDir, dirPath , "${name}_${version}_${currentDatetime( pattern: pattern )}.$ext" );
-    return fileName;
+String createEntityName( String dirPath, String name, { String? ext, String? version, String? pattern, String? addon } ) {
+    var entityName = version == null ? 
+        path.join( GenericFile.userDir, dirPath, "${name}_${currentDatetime( pattern: pattern )}" ) :
+        path.join( GenericFile.userDir, dirPath , "${name}_${version}_${currentDatetime( pattern: pattern )}" );
+    if( ext == null ) {
+        if( addon != null ) {
+            entityName = "${entityName}_$addon";
+        }
+    } else {
+       entityName = "$entityName.$ext";
+    }
+    return entityName;
 }
 
 void Function( ) emptyFunc = ( ) { };
@@ -172,5 +180,17 @@ void printObjectAsJson( String tag, dynamic jsonObject ) {
     debugPrint( tag );
     debugPrint( encoder.convert( jsonObject ) );
 }
+
+/**
+ * Returns specified digit hexs of the input string hash
+ * s the input string
+ * hashLength the hash string length
+ */
+String hash( String s, { int hashLength = 4 } ) {
+    var h = s.hashCode.toRadixString( 16 );
+    var l = h.length;
+    return h.substring( l < hashLength + 1 ? 0 : l - hashLength, l ).toUpperCase( );
+}
+
 
 

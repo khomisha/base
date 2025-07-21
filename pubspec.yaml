@@ -1,6 +1,6 @@
 name: base
 description: "A base elements library."
-version: 0.0.2
+version: 0.0.3
 repository: file:///home/mk/workspace/dart/base
 
 environment:

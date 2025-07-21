@@ -6,7 +6,7 @@ import 'app_presenter.dart';
 
 void main( ) async {
     await loadConfig( );
-    setupLogger( );
+    initLogger( );
     runApp(
         const MaterialApp(
             debugShowCheckedModeBanner: false,

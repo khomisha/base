@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'file.dart';
 import 'package:path/path.dart';
+import 'logger.dart';
 
 /**
  * File object desktop implementation
@@ -12,14 +13,16 @@ import 'package:path/path.dart';
 class FileImpl implements GenericFile {
     static String userDir = Platform.environment[ 'HOME' ] ?? Platform.environment[ 'USERPROFILE' ]!;
     static String appDir = Directory.current.path;
-    static String assetsDir = _isStandalone( ) ? join( appDir, 'data', 'flutter_assets' ) : appDir;
+    static String assetsDir = _isStandalone( ) ? 
+        join( appDir, 'data', 'flutter_assets', 'assets' ) : 
+        join( appDir, 'assets' );
     late final File _file;
 
     /**
      * fileName the full file name
      */
     FileImpl( String fileName ) {
-        _createDir( fileName ).then( ( value ) => _file = File( fileName ) );
+        mkDir( dirname( fileName ) ).then( ( value ) => _file = File( fileName ) );
     }
 
     /**
@@ -27,7 +30,13 @@ class FileImpl implements GenericFile {
      */ 
     @override
     Future< String > readString( ) async {
-        return await _file.readAsString( );
+        try {
+            return await _file.readAsString( );
+        }
+        on IOException catch( e, stack ) {
+            logger.severe( 'Read file error: $e', stack );
+            return "";
+        }
     }
     
     /**
@@ -35,44 +44,75 @@ class FileImpl implements GenericFile {
      */
     @override
     void writeString( String contents, { int mode = GenericFile.WRITE } ) async {
-        var fileMode = FileMode.write;
-        switch( mode ) {
-            case GenericFile.WRITE:
-                fileMode = FileMode.write;
-                break;
-            case GenericFile.APPEND:
-                fileMode = FileMode.append;
-                break;
-            case GenericFile.WRITE_ONLY:
-                fileMode = FileMode.writeOnly;
-                break;
-            case GenericFile.WRITE_ONLY_APPEND:
-                fileMode = FileMode.writeOnlyAppend;
-                break;
+        try {
+            var fileMode = FileMode.write;
+            switch( mode ) {
+                case GenericFile.WRITE:
+                    fileMode = FileMode.write;
+                    break;
+                case GenericFile.APPEND:
+                    fileMode = FileMode.append;
+                    break;
+                case GenericFile.WRITE_ONLY:
+                    fileMode = FileMode.writeOnly;
+                    break;
+                case GenericFile.WRITE_ONLY_APPEND:
+                    fileMode = FileMode.writeOnlyAppend;
+                    break;
+            }
+            await _file.writeAsString( contents, mode: fileMode, encoding: utf8, flush: false );
         }
-        await _file.writeAsString( contents, mode: fileMode, encoding: utf8, flush: false );
+        on IOException catch( e, stack ) {
+            logger.severe( 'Write file error: $e', stack );
+        }
+    }
+
+    @override
+    void delete( ) {
+        _file.delete( );
     }
 
     /**
-     * Creates directory if it does not exist
-     * fileName the full file name
+     * see [GenericFile.copyDirectory]
      */
-    Future< void > _createDir( String fileName ) async {
-        var path = dirname( fileName );
+    static void copyDirectory( String source, String destination ) {
+        var src = Directory( source );
+        var dest = Directory( destination );
+        if( !dest.existsSync( ) ) {
+            dest.createSync( recursive: true );
+        }
+
+        src.listSync( recursive: false ).forEach( 
+            ( var entity ) {
+                if( entity is Directory ) {
+                    var newDirectory = join( dest.absolute.path, basename( entity.path ) );
+                    copyDirectory( entity.absolute.path, newDirectory );
+                } else if( entity is File ) {
+                    entity.copySync( join( dest.path, basename( entity.path ) ) );
+                }
+            }
+        );
+    }
+    
+    /**
+     * see [GenericFile.mkDir]
+     */
+    static Future< void > mkDir( String path ) async {
         if( !Directory( path ).existsSync( ) ) {
             await Directory( path ).create( );
         } 
     }
+
+    /**
+     * Returns true if it runs as standalone application, otherwise (ide) false
+     */
+    static bool _isStandalone( ) {
+        for( var entity in Directory.current.listSync( ) ) {
+            if( entity is Directory && entity.path.contains( 'data' ) ) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
 
-/**
- * Returns true if it runs as standalone application, otherwise (ide) false
- */
-bool _isStandalone( ) {
-    for( var entity in Directory.current.listSync( ) ) {
-        if( entity is Directory && entity.path.contains( 'data' ) ) {
-            return true;
-        }
-    }
-    return false;
-}

@@ -40,7 +40,7 @@ const createWindow = ( ) => {
     )
 
     // Create the secondary window
-    const browser = new BrowserWindow(
+    browser = new BrowserWindow(
         {
             width: 800,
             height: 600,
@@ -51,7 +51,8 @@ const createWindow = ( ) => {
             webPreferences: { 
                 nodeIntegration: true, 
                 contextIsolation: true
-            }
+            },
+            //titleBarStyle: 'hidden'
         }
     )
 
@@ -60,9 +61,11 @@ const createWindow = ( ) => {
     
     mainWindow.on( "closed", 
         ( ) => {
-            browser.close( );
+            browser.destroy( );
         }
     );
+
+    browser.on( "close", ( event ) => { event.preventDefault( ) } );
 
     // and load the index.html of the app.
     mainWindow.loadFile( 'index.html' );

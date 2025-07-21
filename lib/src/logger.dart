@@ -16,8 +16,8 @@ import 'package:logging/logging.dart';
 
 late final Logger logger;
 
-void setupLogger( ) {
-    final logFile = GenericFile( createFileName( "logs", config[ 'app_name' ], "log", pattern: "yyyyMMdd" ) );
+void initLogger( ) {
+    final logFile = GenericFile( createEntityName( "logs", config[ 'app_name' ], ext: "log", pattern: "yyyyMMdd" ) );
     Logger.root.level = _getLevel( config[ 'log_level' ] );
     Logger.root.onRecord.listen( 
         ( record ) {

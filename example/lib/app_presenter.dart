@@ -5,7 +5,7 @@ import 'app_constants.dart';
 import 'package:base/base.dart';
 import 'broker_init_web.dart' if (dart.library.io) 'broker_init_io.dart';
 
-class AppPresenter extends Publisher {
+class AppPresenter {
     static final AppPresenter _instance = AppPresenter._( );
     late AppBroker _broker;
 
@@ -37,6 +37,10 @@ class AppPresenter extends Publisher {
 
     void dispose( ) {
         _broker.dispose( );
+    }
+    
+    List< ListItem > getData( String type ) {
+        throw UnimplementedError( );
     }
 }
 

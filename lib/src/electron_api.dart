@@ -9,15 +9,11 @@ extension type ElectronAPI._( JSObject _ ) implements JSObject {
     external JSString getUserDir( );
     external JSString getAppDir( );
     external JSPromise< JSObject > sendMessage( JSObject? data );
+    external JSPromise< JSAny > changeVisibility( );
+    external JSPromise< JSAny > copyDir( JSString src, JSString dest );
+    external JSPromise< JSAny > mkDir( JSString path );
+    external JSPromise< JSAny > delete( JSString path );
 }
 
 @JS( )
 external ElectronAPI get electronAPI;
-
-/**
- * see [example]
- */
-@staticInterop
-extension type JSError( JSObject _ ) implements JSObject {
-    external String get message;
-}

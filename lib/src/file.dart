@@ -5,7 +5,7 @@ import 'file_web.dart' if( dart.library.io ) 'file_io.dart';
 /**
  * File wrapper
  */
-abstract interface class GenericFile {
+abstract class GenericFile {
     static const int READ = 0;
     static const int WRITE = 1;
     static const int APPEND = 2;
@@ -41,4 +41,26 @@ abstract interface class GenericFile {
      * mode the write mode, default [WRITE]
      */
     void writeString( String content, { int mode } );
+
+    /**
+     * Deletes this file
+     */
+    void delete( );
+
+    /**
+     * Copy source dir to destination recursively
+     * source the source dir
+     * destination the destination dir
+     */
+    static void copyDirectory( String source, String destination ) {
+        FileImpl.copyDirectory( source, destination );
+    }
+
+    /**
+     * Creates directory if it does not exist
+     * path the path to dir
+     */
+    static void mkDir( String path ) {
+        FileImpl.mkDir( path );
+    }
 }

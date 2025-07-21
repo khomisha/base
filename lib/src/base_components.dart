@@ -636,3 +636,60 @@ class _SwiperPanelState extends State< SwiperPanel > {
     }
 }
 
+/**
+ * Creates pop up menu
+ * menuItems the menu items
+ */
+List< Widget > createMenu( List< PopupMenuEntry > menuItems ) {
+    var pmb = PopupMenuButton( 
+        icon: const Icon( Icons.menu ), 
+        itemBuilder: ( BuildContext context ) => menuItems 
+    );
+    return [ pmb ];
+}
+
+/**
+ * Toggle menu item changes it's label depends of it's mode
+ */
+// ignore: must_be_immutable
+class ToggleMenuItem< T > extends PopupMenuEntry< T > {
+    final List< String > modes;
+    final Function( bool ) onTap;
+    bool tag = true;
+    
+    /**
+     * onTap the custom function
+     * modes the modes, for example 'show','hide'
+     */
+    ToggleMenuItem( this.onTap, this.modes, { super.key } );
+
+    @override
+    ToggleMenuItemState< T > createState( ) => ToggleMenuItemState< T >( );
+
+    @override
+    double get height => kMinInteractiveDimension; // Material default height
+
+    @override
+    bool represents( T? value ) => false;
+}
+
+class ToggleMenuItemState< T > extends State< ToggleMenuItem< T > > {
+    late final Function( ) _onTap;
+
+    @override
+    void initState( ) {
+        _onTap = ( ) {
+            setState( ( ) => widget.tag = !widget.tag );
+            widget.onTap.call( widget.tag );
+        };
+        super.initState( );
+    }
+
+    @override
+    Widget build( BuildContext context ) {
+        var label = widget.tag ? widget.modes[ 0 ] : widget.modes[ 1 ];
+        return PopupMenuItem( onTap: _onTap, child: Text( label ) );
+    }
+}
+
+

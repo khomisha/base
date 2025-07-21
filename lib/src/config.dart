@@ -11,7 +11,7 @@ import 'file.dart';
  * The application start up settings
  */
 
-final file = GenericFile( path.join( GenericFile.assetsDir, 'assets', 'cfg', 'app_settings.json' ) );
+final _file = GenericFile( path.join( GenericFile.assetsDir, 'cfg', 'app_settings.json' ) );
 late final Map< String, dynamic > config;
 
 /**
@@ -19,14 +19,14 @@ late final Map< String, dynamic > config;
  */
 void updateConfig( ) {
     var encoder = const JsonEncoder.withIndent( INDENT );
-    file.writeString( encoder.convert( config ) );
+    _file.writeString( encoder.convert( config ) );
 }
 
 /**
  * Loads application config
  */
 Future< void > loadConfig( ) async {
-    var value = await file.readString( );
+    var value = await _file.readString( );
     config = json.decode( value ) as Map< String, dynamic >;
 }
 

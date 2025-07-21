@@ -3,14 +3,13 @@
 import 'dart:isolate';
 import 'package:easy_isolate/easy_isolate.dart';
 import 'logger.dart';
-import 'notification.dart';
 import 'presenter.dart';
 import 'util.dart';
 
 /**
  * Broker for sending messages between presenter and model
  */
-abstract class Broker extends Publisher implements Presenter {
+abstract class Broker implements Presenter {
     // A worker is responsible for a new isolate (thread)
     late Worker _worker;
 
