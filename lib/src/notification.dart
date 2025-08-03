@@ -73,6 +73,7 @@ class EventBroker {
                 subscribers.map( 
                     ( subscriber ) async {
                         try {
+                            logger.info( '$subscriber: ${event.type}' );
                             await _executeSafely( ( ) => subscriber.onEvent( event ) );
                         } 
                         catch( e ) {
