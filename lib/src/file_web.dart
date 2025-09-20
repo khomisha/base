@@ -4,7 +4,7 @@ import 'dart:js_interop';
 import 'electron_api.dart';
 import 'file.dart';
 import 'package:path/path.dart' as path;
-import 'jserror_web.dart';
+import 'extensions_web.dart';
 import 'logger.dart';
 
 /**

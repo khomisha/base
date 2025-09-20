@@ -17,3 +17,4 @@ extension type ElectronAPI._( JSObject _ ) implements JSObject {
 
 @JS( )
 external ElectronAPI get electronAPI;
+
