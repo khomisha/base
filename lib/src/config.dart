@@ -22,12 +22,13 @@ void updateConfig( ) {
     _file.writeString( encoder.convert( config ) );
 }
 
+late final Color guiColor;
+
 /**
  * Loads application config
  */
 Future< void > loadConfig( ) async {
     var value = await _file.readString( );
     config = json.decode( value ) as Map< String, dynamic >;
+    guiColor = colors[ config[ 'gui_primary_color' ] ] ?? Colors.blue;
 }
-
-final guiColor = colors[ config[ 'gui_primary_color' ] ] ?? Colors.blue;

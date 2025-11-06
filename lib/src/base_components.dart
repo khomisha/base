@@ -6,9 +6,11 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:multi_split_view/multi_split_view.dart';
 import 'package:provider/provider.dart';
 import 'injection_object.dart';
+import 'logger.dart';
 import 'widget_presenter.dart';
 import 'style.dart';
 import 'util.dart';
+import 'package:logging/logging.dart';
 
 /**
  * The base list with form to edit selected list item
@@ -640,12 +642,12 @@ class _SwiperPanelState extends State< SwiperPanel > {
  * Creates pop up menu
  * menuItems the menu items
  */
-List< Widget > createMenu( List< PopupMenuEntry > menuItems ) {
+Widget createMenu( List< PopupMenuEntry > menuItems ) {
     var pmb = PopupMenuButton( 
         icon: const Icon( Icons.menu ), 
         itemBuilder: ( BuildContext context ) => menuItems 
     );
-    return [ pmb ];
+    return pmb;
 }
 
 /**
@@ -690,6 +692,223 @@ class ToggleMenuItemState< T > extends State< ToggleMenuItem< T > > {
         var label = widget.tag ? widget.modes[ 0 ] : widget.modes[ 1 ];
         return PopupMenuItem( onTap: _onTap, child: Text( label ) );
     }
+}
+
+/**
+ * Show snack bar in the current context with record.message content.
+ * context the current context
+ * record the log record
+ * Usage example:
+ * ``` dart
+ *  void initState( ) {
+        notification.stream.listen( 
+            ( record ) { 
+                WidgetsBinding.instance.addPostFrameCallback(
+                    ( _ ) {
+                        showSnackBar( context, record );
+                    }
+                );
+            }
+        );
+        logger.info( "initState" );
+        sv = Supervisor( this );
+        super.initState( );
+    }
+    ```
+ */
+void showSnackBar( BuildContext context, LogRecord record ) {
+    final color = logRecordColor( record.level );
+
+    ScaffoldMessenger.of( context ).showSnackBar(
+        SnackBar(
+            content: Text( record.message, style: Style.fieldStyle ),
+            backgroundColor: color,
+            duration: const Duration( seconds: 5 ),
+            padding: const EdgeInsets.symmetric( horizontal: 8.0 ),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder( borderRadius: BorderRadius.circular( 10.0 ) ),
+        )
+    );
+}
+
+// Color logRecordColor( Level level ) {
+//     return level >= Level.SEVERE ? Colors.red.shade300
+//         : level >= Level.WARNING ? Colors.orange.shade300
+//         : ( guiColor as MaterialColor ).shade300;
+// }
+
+/**
+ * Returns color for specified log level
+ * level the log level
+ */
+Color logRecordColor( Level level ) {
+    return level >= Level.SEVERE ? Style.theme.colorScheme.errorContainer
+        : level >= Level.WARNING ? Style.theme.colorScheme.tertiaryFixed
+        : Style.theme.colorScheme.primaryFixed;
+}
+
+/** 
+ * A collapsible notification panel that shows live notifications from [NotificationCenter]
+ */
+class NotificationPanel extends StatefulWidget {
+    final VoidCallback onClose;
+    
+    const NotificationPanel( { super.key, required this.onClose } );
+
+    @override
+    State< NotificationPanel > createState( ) => _NotificationPanelState( );
+}
+
+class _NotificationPanelState extends State< NotificationPanel > {
+
+    @override
+    Widget build( BuildContext context ) {
+        return Container(
+            width: 450,
+            height: 400,
+            padding: const EdgeInsets.all( 8 ),
+            child: Column(
+                children: [
+                    Row(
+                        children: [
+                            const Icon( Icons.notifications, size: 20 ),
+                            const SizedBox( width: 8 ),
+                            const Text(
+                                'Notifications',
+                                style: TextStyle( fontWeight: FontWeight.bold ),
+                            ),
+                            const Spacer( ),
+                            IconButton(
+                                icon: const Icon( Icons.close ),
+                                onPressed: widget.onClose,
+                            ),
+                        ],
+                    ),
+                    const Divider( height: 8 ),
+                    Expanded(
+                    	child: notification.records.isEmpty
+						? const Center( child: Text( 'No notifications yet' ) )
+						: ListView.builder(
+							reverse: true,
+							itemCount: notification.records.length,
+							itemBuilder: ( context, index ) {
+								final record = notification.records[ notification.records.length - index - 1 ];
+								return _LogItem( record );
+							},
+						),
+                    ),
+                ],
+            ),
+        );
+    }
+}
+
+class _LogItem extends StatelessWidget {
+  final LogRecord record;
+  const _LogItem( this.record );
+
+  @override
+  Widget build( BuildContext context ) {
+        return Container(
+            margin: const EdgeInsets.symmetric( vertical: 2 ),
+            decoration: BoxDecoration(
+                color: logRecordColor( record.level ),
+                borderRadius: BorderRadius.circular( 8 ),
+            ),
+            padding: const EdgeInsets.all( 6 ),
+            child: Text(
+                '${record.time}: ${record.level.name}: ${record.message}',
+                style: Style.fieldStyle,
+            ),
+        );
+    }
+}
+
+/**
+ * The notification button
+ * Usage example:
+ * ``` dart
+ *  void initState( ) {
+        var appBar = AppBar( 
+            title: const Text( "Testiso" ), 
+            actions: [ const NotificationButton( ), createMenu( < PopupMenuEntry >[ showEditor ] ) ] 
+        );
+    ```
+ */
+class NotificationButton extends StatefulWidget {
+    const NotificationButton( { super.key } );
+
+    @override
+    State< NotificationButton > createState( ) => _NotificationButtonState( );
+}
+
+class _NotificationButtonState extends State< NotificationButton > {
+	bool _isExpanded = false;
+	OverlayEntry? _overlayEntry;
+    bool _hasUnread = false;
+
+    @override
+    void initState( ) {
+        super.initState( );
+        notification.stream.listen( 
+            ( record ) {
+                // When new record arrives and panel is not open
+                if( !_isExpanded ) {
+                    setState( ( ) => _hasUnread = true );
+                }
+            }
+        );
+    }
+
+	void _togglePanel( BuildContext context ) {
+		if( _isExpanded ) {
+			_overlayEntry?.remove( );
+			_overlayEntry = null;
+			setState( ( ) => _isExpanded = false );
+			return;
+		}
+
+		final overlay = Overlay.of( context );
+
+		_overlayEntry = OverlayEntry(
+			builder: ( context ) => Positioned(
+				top: kToolbarHeight + 8,
+				right: 8,
+				width: 360,
+				child: Material(
+					elevation: 8,
+					borderRadius: BorderRadius.circular( 12 ),
+					child: NotificationPanel( onClose: ( ) => _togglePanel( context ) )
+				)
+			)
+		);
+
+		overlay.insert( _overlayEntry! ); // ✅ safe
+		setState( 
+            ( ) { 
+                _isExpanded = true;
+                _hasUnread = false;
+            } 
+        );
+	}
+
+	@override
+	Widget build( BuildContext context ) {
+        final latest = notification.records.isNotEmpty ? notification.records.last : null;
+        final icon = latest == null
+            ? Icons.notifications_none
+            : latest.level >= Level.SEVERE
+                ? Icons.error_outline
+                : latest.level >= Level.WARNING
+                    ? Icons.warning_amber_rounded
+                    : Icons.notifications_active_outlined;
+        final ic = IconButton(
+			icon: Icon( _hasUnread ? icon : Icons.notifications_none, color: Style.theme.textTheme.labelMedium!.color ),
+			tooltip: 'Notifications',
+			onPressed: ( ) => _togglePanel( context ),
+		);
+		return CircleAvatar( backgroundColor: Style.theme.colorScheme.primaryFixedDim, child: ic );
+	}
 }
 
 

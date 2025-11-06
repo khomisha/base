@@ -1,3 +1,5 @@
+import 'dart:js_interop_unsafe';
+
 import 'package:js_interop_utils/js_interop_utils.dart';
 
 /**
@@ -25,5 +27,20 @@ extension JSArrayInterop on JSArray< JSString > {
             list.add( this[ i ].toDart );
         }
         return list;
+    }
+}
+
+/**
+ * Returns specified property from JSObject or null
+ * jsObject the source object
+ * property the property name
+ */
+T? getProperty< T extends JSAny >( JSObject jsObject, String property ) {
+    try {
+        final value = jsObject.getProperty< T >( property.toJS );
+        return value;
+    } 
+    catch( e ) {
+        return null;
     }
 }

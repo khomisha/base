@@ -1,3 +1,5 @@
+import 'dart:async' show StreamController;
+
 import 'config.dart';
 import 'file.dart';
 import 'util.dart';
@@ -26,6 +28,7 @@ void initLogger( ) {
             if( record.stackTrace != null ) {
                 logFile.writeString( record.stackTrace.toString( ), mode: GenericFile.APPEND );
             }
+            notification.add( record );
         }
     );
     logger = Logger( config[ 'app_name' ] );
@@ -57,6 +60,30 @@ Level _getLevel( String level ) {
             return Level.ALL;
     }
 }
+
+/**
+ * The notification center accumulates messages to show in application
+ */
+class NotificationCenter {
+    NotificationCenter._( );
+
+    final _controller = StreamController< LogRecord >.broadcast( );
+    final List< LogRecord > _records = [];
+
+    List< LogRecord > get records => List.unmodifiable( _records );
+    Stream< LogRecord > get stream => _controller.stream;
+
+    void add( LogRecord record ) {
+        _records.add( record );
+        _controller.add( record );
+    }
+
+    void dispose( ) {
+        _controller.close( );
+    }
+}
+final notification = NotificationCenter._( );
+
 
 // Usage
 // await setupLogger();

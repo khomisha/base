@@ -8,11 +8,11 @@ import 'package:flutter/material.dart';
 class Panel extends StatefulWidget {
     final String title;
     final Widget childWidget;
-    final List< Widget >? menu;
+    final List< Widget >? actions;
     final Icon? icon;
 
     const Panel( 
-        { super.key, required this.title, required this.childWidget, this.icon, this.menu } 
+        { super.key, required this.title, required this.childWidget, this.icon, this.actions } 
     );
 
     @override
@@ -23,7 +23,7 @@ class _PanelState extends State< Panel > {
 
     @override
     Widget build( BuildContext context ) {
-        var appBar = AppBar( title: Text( widget.title ), actions: widget.menu );
+        var appBar = AppBar( title: Text( widget.title ), actions: widget.actions );
         return Scaffold( appBar: appBar, body: Center( child: widget.childWidget ) );
     }
 }
