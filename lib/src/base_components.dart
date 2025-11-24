@@ -11,6 +11,7 @@ import 'widget_presenter.dart';
 import 'style.dart';
 import 'util.dart';
 import 'package:logging/logging.dart';
+import 'package:toastification/toastification.dart';
 
 /**
  * The base list with form to edit selected list item
@@ -731,11 +732,37 @@ void showSnackBar( BuildContext context, LogRecord record ) {
     );
 }
 
-// Color logRecordColor( Level level ) {
-//     return level >= Level.SEVERE ? Colors.red.shade300
-//         : level >= Level.WARNING ? Colors.orange.shade300
-//         : ( guiColor as MaterialColor ).shade300;
-// }
+/**
+ * Show toast in the current context with record.message content.
+ * context the current context
+ * record the log record
+ * Usage example:
+ * ``` dart
+ *  void initState( ) {
+        notification.stream.listen( 
+            ( record ) { 
+                WidgetsBinding.instance.addPostFrameCallback(
+                    ( _ ) {
+                        showToast( context, record );
+                    }
+                );
+            }
+        );
+        logger.info( "initState" );
+        sv = Supervisor( this );
+        super.initState( );
+    }
+    ```
+ */
+void showToast( BuildContext context, LogRecord record ) {
+    toastification.show( 
+        context: context, 
+        description: Text( record.message ),
+        style: ToastificationStyle.flat,
+        type: getToastType( record.level ),
+        autoCloseDuration: const Duration( seconds: 5 )
+    );
+}
 
 /**
  * Returns color for specified log level
@@ -803,25 +830,65 @@ class _NotificationPanelState extends State< NotificationPanel > {
     }
 }
 
-class _LogItem extends StatelessWidget {
-  final LogRecord record;
-  const _LogItem( this.record );
+// class _LogItem extends StatelessWidget {
+//   final LogRecord record;
+//   const _LogItem( this.record );
 
-  @override
-  Widget build( BuildContext context ) {
+//   @override
+//   Widget build( BuildContext context ) {
+//         return Container(
+//             margin: const EdgeInsets.symmetric( vertical: 2 ),
+//             decoration: BoxDecoration(
+//                 color: logRecordColor( record.level ),
+//                 borderRadius: BorderRadius.circular( 8 ),
+//             ),
+//             padding: const EdgeInsets.all( 6 ),
+//             child: Text(
+//                 '${record.time}: ${record.level.name}: ${record.message}',
+//                 style: Style.fieldStyle,
+//             ),
+//         );
+//     }
+// }
+
+class _LogItem extends StatelessWidget {
+    final LogRecord record;
+    const _LogItem( this.record );
+
+    @override
+    Widget build( BuildContext context ) {
+
+        final borderColor = logRecordColor( record.level );
+        final icon = getToastType(record.level).icon;
+
         return Container(
             margin: const EdgeInsets.symmetric( vertical: 2 ),
             decoration: BoxDecoration(
-                color: logRecordColor( record.level ),
                 borderRadius: BorderRadius.circular( 8 ),
+                border: Border.all( color: borderColor, width: 1.5 ),
             ),
             padding: const EdgeInsets.all( 6 ),
-            child: Text(
-                '${record.time}: ${record.level.name}: ${record.message}',
-                style: Style.fieldStyle,
+            child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                    Icon( icon, color: borderColor ),         // Level-based icon
+                    const SizedBox( width: 8 ),
+                    Expanded(
+                        child: Text(
+                            '${record.time}: ${record.level.name}: ${record.message}',
+                            style: Style.fieldStyle,
+                        ),
+                    ),
+                ],
             ),
         );
     }
+}
+
+ToastificationType getToastType( Level level ) {
+    return level >= Level.SEVERE ? ToastificationType.error
+        : level >= Level.WARNING ? ToastificationType.warning
+        : ToastificationType.info;
 }
 
 /**

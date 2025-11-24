@@ -31,7 +31,7 @@ class Style {
             borderRadius: borderRadius
         ),
         enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide( color: theme.primaryColor.withOpacity( 0.45 ) ),
+            borderSide: BorderSide( color: theme.primaryColor.withAlpha( 115 ) ),
             borderRadius: borderRadius
         ),
         labelStyle: theme.textTheme.labelLarge,

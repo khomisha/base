@@ -23,7 +23,6 @@ class _PanelState extends State< Panel > {
 
     @override
     Widget build( BuildContext context ) {
-        var appBar = AppBar( title: Text( widget.title ), actions: widget.actions );
-        return Scaffold( appBar: appBar, body: Center( child: widget.childWidget ) );
+        return Center( child: widget.childWidget );
     }
 }
