@@ -12,6 +12,7 @@ import 'style.dart';
 import 'util.dart';
 import 'package:logging/logging.dart';
 import 'package:toastification/toastification.dart';
+import 'dart:async' show StreamSubscription;
 
 /**
  * The base list with form to edit selected list item
@@ -147,8 +148,9 @@ abstract class BaseForm< T extends WidgetPresenter > extends StatelessWidget {
                     widgets.add( field );
                 }
             }
-            var buttonBar = ButtonBar(
-                buttonHeight: 50,
+            var buttonBar = OverflowBar(
+                spacing: 7.0,
+                alignment: MainAxisAlignment.end,
                 children: < Widget > [ getButton( onOK, "OK" ), getButton( onCancel, "Cancel" ) ]
             );
             widgets.add( Visibility( visible: !presenter.readOnly, child: buttonBar ) );
@@ -180,7 +182,8 @@ abstract class BaseForm< T extends WidgetPresenter > extends StatelessWidget {
             case TEXT_FIELD:
                 field = Field.textField( 
                     value: data[ attributeName ], 
-                    pattern: pattern
+                    pattern: pattern,
+                    readOnly: agent.presenter.readOnly
                 );
                break;
             default:
@@ -195,15 +198,17 @@ abstract class BaseForm< T extends WidgetPresenter > extends StatelessWidget {
     void onOK( ) {
 		for( String attributeName in getPattern( agent.presenter.dataType ).keys.toList( ) ) {
             var field = _fields[ attributeName ];
-            if( field!.nativeField is TextBox ) { 
+            if( field!.nativeField is TextBox ) {
+                var textBox = field.nativeField as TextBox;
                 var value = field.accessObj.innerObj.controller!.text;
                 if( value != null ) {
-                    if( !field.nativeField.fieldKey.currentState!.validate( ) ) {
+                    if( !textBox.fieldKey.currentState!.validate( ) ) {
+                        logger.warning( 'Invalid value $value' );
                         return;
                     }
                     agent.presenter.update(
                         attributeName, 
-                        fromString( field.nativeField.value.runtimeType, value ), 
+                        fromString( textBox.value.runtimeType, value ), 
                         false
                     );
                 }
@@ -368,7 +373,7 @@ class Field extends StatelessWidget {
 class TextBox extends StatelessWidget {
     final dynamic value;
     final FieldPattern pattern;
-    final GlobalKey< FormFieldState > fieldKey = GlobalKey( );
+    final GlobalKey< FormFieldState > fieldKey = GlobalKey< FormFieldState >( );
     final bool readOnly;
     final InjectionObject accessObj;
 
@@ -528,7 +533,7 @@ class WidgetContainer extends StatelessWidget {
 }
 
 /**
- * The field stab
+ * The field stub
  */
 class FieldStub extends StatelessWidget {
     final String followup;
@@ -760,7 +765,7 @@ void showToast( BuildContext context, LogRecord record ) {
         description: Text( record.message ),
         style: ToastificationStyle.flat,
         type: getToastType( record.level ),
-        autoCloseDuration: const Duration( seconds: 5 )
+        autoCloseDuration: const Duration( seconds: 3 )
     );
 }
 
@@ -796,20 +801,15 @@ class _NotificationPanelState extends State< NotificationPanel > {
             padding: const EdgeInsets.all( 8 ),
             child: Column(
                 children: [
-                    Row(
+                    const Row(
                         children: [
-                            const Icon( Icons.notifications, size: 20 ),
-                            const SizedBox( width: 8 ),
-                            const Text(
+                            Icon( Icons.notifications, size: 20 ),
+                            SizedBox( width: 8 ),
+                            Text(
                                 'Notifications',
                                 style: TextStyle( fontWeight: FontWeight.bold ),
-                            ),
-                            const Spacer( ),
-                            IconButton(
-                                icon: const Icon( Icons.close ),
-                                onPressed: widget.onClose,
-                            ),
-                        ],
+                            )
+                        ]
                     ),
                     const Divider( height: 8 ),
                     Expanded(
@@ -913,12 +913,16 @@ class _NotificationButtonState extends State< NotificationButton > {
 	bool _isExpanded = false;
 	OverlayEntry? _overlayEntry;
     bool _hasUnread = false;
+    late final StreamSubscription< LogRecord > _sub;
 
     @override
     void initState( ) {
         super.initState( );
-        notification.stream.listen( 
+        _sub = notification.stream.listen( 
             ( record ) {
+                if( !mounted ) {
+                    return;     // extra safety
+                }
                 // When new record arrives and panel is not open
                 if( !_isExpanded ) {
                     setState( ( ) => _hasUnread = true );
@@ -976,6 +980,105 @@ class _NotificationButtonState extends State< NotificationButton > {
 		);
 		return CircleAvatar( backgroundColor: Style.theme.colorScheme.primaryFixedDim, child: ic );
 	}
+
+    @override
+    void dispose( ) {
+        _sub.cancel( );
+        // Also clean overlay if still open
+        _overlayEntry?.remove( );
+        _overlayEntry = null;
+        super.dispose( );
+    }
 }
+
+/**
+ * Simple message box with 'OK' button
+ * context the context
+ * title the box title
+ * message the message
+ * Usage:
+ * ``` dart
+ *  await showMessageBox(
+        context,
+        title: 'Error',
+        message: 'Something went wrong'
+    );
+    ```
+ */
+Future< void > showMessageBox( BuildContext context, { required String title, required String message } ) {
+    return showDialog< void >(
+        context: context,
+        barrierDismissible: false, // force OK click
+        builder: (context) => AlertDialog(
+            title: Text( title ),
+            content: Text( message ),
+            actions: [
+                TextButton(
+                    onPressed: ( ) => Navigator.of( context ).pop( ),
+                    child: const Text( 'OK' ),
+                )
+            ]
+        )
+    );
+}
+
+/**
+ * MessageBox with Yes / No (returns result)
+ * Usage:
+ * ``` dart
+    final ok = await showConfirmBox(
+        context,
+        title: 'Delete project',
+        message: 'Are you sure?',
+    );
+
+    if( ok ) {
+        presenter.delete( );
+    }
+    ```
+*/
+Future< bool > showConfirmBox(
+    BuildContext context, 
+    {
+        required String title,
+        required String message,
+        String okText = 'Yes',
+        String cancelText = 'No',
+    }
+) async {
+    final result = await showDialog< bool >(
+        context: context,
+        barrierDismissible: false,
+        builder: ( context ) => AlertDialog(
+            title: Text( title ),
+            content: Text( message ),
+            actions: [
+                TextButton(
+                    onPressed: ( ) => Navigator.of( context ).pop( false ),
+                    child: Text( cancelText ),
+                ),
+                ElevatedButton(
+                    onPressed: ( ) => Navigator.of( context ).pop( true ),
+                    child: Text( okText ),
+                )
+            ]
+        )
+    );
+    return result ?? false;
+}
+
+class MessageBox {
+    static Future< void > info( BuildContext context, String msg ) =>
+        showMessageBox( context, title: 'Info', message: msg );
+
+    static Future< void > error( BuildContext context, String msg ) =>
+        showMessageBox( context, title: 'Error', message: msg );
+
+    static Future< bool > confirm( BuildContext context, String msg ) =>
+        showConfirmBox( context, title: 'Confirm', message: msg );
+}
+
+
+
 
 

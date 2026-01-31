@@ -8,6 +8,7 @@ import "package:hex/hex.dart";
 import 'dart:convert';
 import 'package:path/path.dart' as path;
 import 'constants.dart';
+import 'logger.dart';
 
 typedef FromString = dynamic Function( String value );
 
@@ -52,15 +53,7 @@ Widget getStub( String text ) {
  * value the value to parse
  */
 DateTime? parse2Datetime( String format, String value ) {
-    DateTime result;
-    try {
-        result = DateFormat( format ).parse( value );
-    }
-    // ignore: unused_catch_clause
-    on FormatException catch( e ) {
-        return null;
-    }
-    return result;
+    return DateFormat( format ).tryParse( value );
 }
 
 /**
@@ -169,6 +162,11 @@ class ListItem implements Comparable {
     int compareTo( other ) {
         return customData.compareTo( other.customData );
     }
+
+    @override
+    String toString( ) {
+        return customData.toString( );   
+    }
 }
 
 /**
@@ -177,8 +175,7 @@ class ListItem implements Comparable {
  */
 void printObjectAsJson( String tag, dynamic jsonObject ) {
     var encoder = const JsonEncoder.withIndent( INDENT );
-    debugPrint( tag );
-    debugPrint( encoder.convert( jsonObject ) );
+    logger.info( Message( tag, encoder.convert( jsonObject ) ) );
 }
 
 /**
@@ -190,6 +187,18 @@ String hash( String s, { int hashLength = 4 } ) {
     var h = s.hashCode.toRadixString( 16 );
     var l = h.length;
     return h.substring( l < hashLength + 1 ? 0 : l - hashLength, l ).toUpperCase( );
+}
+
+class Message {
+    String title;
+    String detail;
+
+    Message( this.title, [ this.detail = "" ] );
+
+    @override
+    String toString( ) {
+        return title;
+    }
 }
 
 

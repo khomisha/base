@@ -6,6 +6,7 @@ import 'dart:io';
 import 'file.dart';
 import 'package:path/path.dart';
 import 'logger.dart';
+import 'package:file_picker/file_picker.dart';
 
 /**
  * File object desktop implementation
@@ -104,6 +105,12 @@ class FileImpl implements GenericFile {
     }
 
     /**
+     * see [GenericFile.isExist]
+     */
+    static bool isExist( String path ) {
+        return Directory( path ).existsSync( );
+    }
+    /**
      * Returns true if it runs as standalone application, otherwise (ide) false
      */
     static bool _isStandalone( ) {
@@ -114,5 +121,20 @@ class FileImpl implements GenericFile {
         }
         return false;
     }
+
+    /**
+     * see [GenericFile.pickFile]
+     */
+    static Future< String? > pickFile( { title, filterName, extensions } ) async {
+        FilePickerResult? result = await FilePicker.platform.pickFiles( 
+            dialogTitle: title,
+            allowedExtensions: extensions 
+        );
+        if( result != null ) {
+            return result.files.single.path as String;
+        } else {
+            return null;
+        }
+    } 
 }
 

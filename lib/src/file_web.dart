@@ -1,11 +1,11 @@
 // ignore_for_file: unused_element, slash_for_doc_comments
 
-import 'dart:js_interop';
 import 'electron_api.dart';
 import 'file.dart';
 import 'package:path/path.dart' as path;
 import 'extensions_web.dart';
 import 'logger.dart';
+import 'package:js_interop_utils/js_interop_utils.dart';
 
 /**
  * File object web implementation
@@ -51,8 +51,13 @@ class FileImpl implements GenericFile {
     /**
      * see [GenericFile.copyDirectory]
      */
-    static void copyDirectory( String source, String destination ) {
-        electronAPI.copyDir( source.toJS, destination.toJS ).toDart;
+    static void copyDirectory( String source, String destination ) async {
+        try {
+            await electronAPI.copyDir( source.toJS, destination.toJS ).toDart;
+        }
+        on JSError catch ( e ) {
+            logger.severe( '${e.message} source $source destination $destination' );
+        }
     }
 
     /**
@@ -61,4 +66,26 @@ class FileImpl implements GenericFile {
     static void mkDir( String path ) {
         electronAPI.mkDir( path.toJS ).toDart;
     }
-}
+
+    /**
+     * see [GenericFile.isExist]
+     */
+    static bool isExist( String path ) {
+        return electronAPI.isExist( path.toJS ).toDart;
+    }
+
+    /**
+     * see [GenericFile.pickFile]
+     */
+    static Future< String? > pickFile( String title, String filterName, List< String > extensions ) async {
+        final options = {
+            'title': title,
+            'filters': [ { 'name': filterName, 'extensions': extensions } ],
+            'properties': [ 'openFile' ]
+        };
+
+        final JSString? jsResult = await electronAPI.pickupFile( options.toJSDeep ).toDart;
+
+        return jsResult?.toDart;
+    }
+} 

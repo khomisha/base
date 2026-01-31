@@ -1,6 +1,6 @@
 import 'dart:js_interop_unsafe';
-
 import 'package:js_interop_utils/js_interop_utils.dart';
+import 'electron_api.dart';
 
 /**
  * see [example]
@@ -43,4 +43,8 @@ T? getProperty< T extends JSAny >( JSObject jsObject, String property ) {
     catch( e ) {
         return null;
     }
+}
+
+void changeVisibility( ) {
+    electronAPI.changeVisibility( ).toDart;
 }

@@ -23,5 +23,10 @@ abstract class AttributeMap< K, V > implements Comparable {
     set attributes( Map< K, V > value ) => this._attributes = value;
 
     dynamic copy( );
+
+    @override
+    String toString( ) {
+        return _attributes.toString( );
+    }
 }
 

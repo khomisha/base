@@ -63,4 +63,35 @@ abstract class GenericFile {
     static void mkDir( String path ) {
         FileImpl.mkDir( path );
     }
+
+    /**
+     * Returns true if path is exist and false otherwise
+     */
+    static bool isExist( String path ) {
+        return FileImpl.isExist( path );
+    }
+
+    /**
+     * Returns selected file full path
+     * title the dialog title
+     * filterName the filter name
+     * extensions the file extensions list
+     * Usage:
+     * ```   
+        final path = await pickFile(
+        title: 'Select audio file',
+        filterName: 'Audio',
+        extensions: ['mp3', 'wav', 'm4a'],
+        );     
+      ```  
+    */
+    static Future< String? > pickFile( 
+        { 
+            String title = 'Select file', 
+            String filterName = "All Files", 
+            List< String > extensions = const [ '*' ] 
+        }
+    ) {
+        return FileImpl.pickFile( title, filterName, extensions );
+    }
 }

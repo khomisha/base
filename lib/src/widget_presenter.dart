@@ -2,8 +2,6 @@
 // ignore_for_file: slash_for_doc_comments
 
 import 'package:flutter/material.dart';
-import 'attribute_map.dart';
-import 'constants.dart';
 import 'notification.dart';
 import 'util.dart';
 
@@ -17,6 +15,7 @@ abstract class WidgetPresenter extends ChangeNotifier implements Subscriber {
         _list = value;
         _list.sort( );
         selectedIndex = _list.isEmpty ? -1 : 0;
+        onSet( );
         notifyListeners( );
     }
     bool readOnly = true;
@@ -93,12 +92,7 @@ abstract class WidgetPresenter extends ChangeNotifier implements Subscriber {
     } 
 
     @override
-    void onEvent( Event event ) {
-        if( event.type == UPDATE && event.data != null ) {
-            var data = event.data as AttributeMap;
-            list = data.attributes[ dataType ];
-        }
-    }
+    void onEvent( Event event );
 
     /**
      * Selects specified item
@@ -119,5 +113,8 @@ abstract class WidgetPresenter extends ChangeNotifier implements Subscriber {
      * On success operation desendent action
      */
     void onSuccess( ) {
+    }
+
+    void onSet( ) {
     }
 }

@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'logger.dart';
+import 'util.dart';
+import 'widget_presenter.dart';
 
 //eventBroker.dispatch( event );
 
@@ -10,6 +12,17 @@ abstract class Subscriber {
      * event the event to handle
      */
     void onEvent( Event event );
+}
+
+/**
+ * Returns subscriber type
+ */
+String getType( Subscriber subscriber ) {
+    if( subscriber is WidgetPresenter ) {
+        return subscriber.dataType;
+    } else {
+        return "";
+    }
 }
 
 // Event Class
@@ -73,11 +86,15 @@ class EventBroker {
                 subscribers.map( 
                     ( subscriber ) async {
                         try {
-                            logger.info( '$subscriber: ${event.type}' );
                             await _executeSafely( ( ) => subscriber.onEvent( event ) );
                         } 
                         catch( e ) {
-                            logger.severe( 'Error in subscriber: $e' );
+                            logger.severe( 
+                                Message(
+                                    'Error in subscriber: $e $subscriber: ${getType( subscriber )}: ${event.type}',
+                                    'data: ${event.data}'
+                                ) 
+                            );
                         }
                     }
                 )
@@ -86,13 +103,13 @@ class EventBroker {
     }
 
     Future< void > _executeSafely( Function( ) callback ) async {
-        try {
+        //try {
             final result = callback( );
             if( result is Future ) await result;
-        } 
-        catch( e, stack ) {
-            logger.severe( 'Event handling error: $e', stack );
-        }
+        //} 
+        // catch( e, stack ) {
+        //     logger.severe( 'Event handling error: $e', stack );
+        // }
     }
 
     void dispose( ) {

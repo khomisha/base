@@ -16,4 +16,5 @@ export 'src/widget_presenter.dart';
 export 'src/presenter.dart';
 export 'src/notification.dart';
 export 'src/pane.dart';
+export 'src/presenter_registry.dart';
 

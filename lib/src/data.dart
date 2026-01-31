@@ -61,6 +61,6 @@ class Data extends AttributeMap< String, dynamic > {
 
     @override
     String toString( ) {
-        return '${attributes.keys.toList( )} ${attributes.values.toList( )}';
+        return attributes.toString( );
     }
 }

@@ -1,5 +1,4 @@
 import 'dart:async' show StreamController;
-
 import 'config.dart';
 import 'file.dart';
 import 'util.dart';
@@ -26,11 +25,16 @@ void initLogger( ) {
             var msg = '${record.time}: ${record.level.name}: ${record.message}\n';
             logFile.writeString( msg, mode: GenericFile.APPEND );
             if( record.stackTrace != null ) {
-                logFile.writeString( record.stackTrace.toString( ), mode: GenericFile.APPEND );
+                logFile.writeString( '${record.stackTrace}\n', mode: GenericFile.APPEND );
+            }
+            if( record.object != null ) {
+                final message = record.object as Message;
+                logFile.writeString( '${message.detail}\n', mode: GenericFile.APPEND );
             }
             notification.add( record );
         }
     );
+    recordStackTraceAtLevel = Level.SEVERE;
     logger = Logger( config[ 'app_name' ] );
 }
 
