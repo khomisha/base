@@ -57,11 +57,24 @@ class Event {
  */
 class EventBroker {
     final _subscribers = < String, Set< Subscriber > >{ };
-    final _eventQueue = StreamController< Event >.broadcast( );
+    // 1. Use a non‑broadcast controller
+    final _eventQueue = StreamController< Event >( );
 
     EventBroker._( ) {
-        // Setup async processing
-        _eventQueue.stream.listen( _processEvent );
+        _startProcessing( ); // 2. Start the sequential loop
+    }
+
+    // 3. Sequential event processor
+    Future< void > _startProcessing( ) async {
+        await for( final event in _eventQueue.stream ) {
+            try {
+                await _processEvent( event );
+            } 
+            catch ( e, stack ) {
+                logger.severe( 'Fatal error in event loop: $e', stack );
+                // Optionally decide to stop or continue – here we continue
+            }
+        }
     }
 
     void subscribe( Subscriber subscriber, String eventType ) {
@@ -74,26 +87,25 @@ class EventBroker {
     }
 
     void dispatch( Event event ) {
-        // Add to async queue instead of processing immediately
-        _eventQueue.add( event );
+        _eventQueue.add( event ); // 4. Still just adds to the queue
     }
 
-    void _processEvent( Event event ) async {
+    Future< void > _processEvent( Event event ) async {
         final subscribers = _subscribers[ event.type ];
         if( subscribers != null ) {
-            // Process in parallel using isolates if needed
-            await Future.wait( 
-                subscribers.map( 
+            // Run all subscribers for this event concurrently, but wait for all
+            await Future.wait(
+                subscribers.map(
                     ( subscriber ) async {
                         try {
                             await _executeSafely( ( ) => subscriber.onEvent( event ) );
                         } 
                         catch( e ) {
-                            logger.severe( 
+                            logger.severe(
                                 Message(
-                                    'Error in subscriber: $e $subscriber: ${getType( subscriber )}: ${event.type}',
+                                    'Error in subscriber: $e $subscriber: ${getType(subscriber)}: ${event.type}',
                                     'data: ${event.data}'
-                                ) 
+                                )
                             );
                         }
                     }
@@ -103,21 +115,16 @@ class EventBroker {
     }
 
     Future< void > _executeSafely( Function( ) callback ) async {
-        //try {
-            final result = callback( );
-            if( result is Future ) await result;
-        //} 
-        // catch( e, stack ) {
-        //     logger.severe( 'Event handling error: $e', stack );
-        // }
+        // Kept as in your original (with commented try/catch – you may uncomment if needed)
+        final result = callback( );
+        if( result is Future ) await result;
     }
 
-    void dispose( ) {
+    void dispose() {
         _subscribers.clear( );
-        _eventQueue.close( );
+        _eventQueue.close( ); // 5. Closing the stream ends the await for loop
     }
 }
-
 final eventBroker = EventBroker._( );
 
 

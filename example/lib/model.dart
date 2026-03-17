@@ -34,8 +34,8 @@ void process( dynamic data ) {
  * Creates empty project data
  * data the [Data] object
  */
-void _create( Data data ) {
-    sleep( const Duration( seconds: 7 ) );
+void _create( Data data ) async {
+    await Future.delayed( const Duration( seconds: 7 ) );
     data.attributes[ 'data' ] = "created data";
     data.attributes[ 'result' ] = SUCCESS;
 }
@@ -44,8 +44,8 @@ void _create( Data data ) {
  * Loads project data from specified file
  * data the [Data] object to load
  */
-void _load( Data data ) {
-    sleep( const Duration( seconds: 7 ) );
+void _load( Data data ) async {
+    await Future.delayed( const Duration( seconds: 7 ) );
     data.attributes[ 'data' ] = "loaded data";
     data.attributes[ 'result' ] = SUCCESS;
 }

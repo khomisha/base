@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'package:path/path.dart' as path;
 import 'constants.dart';
 import 'logger.dart';
+import 'transition.dart';
 
 typedef FromString = dynamic Function( String value );
 
@@ -84,21 +85,6 @@ String currentDatetime( { String? pattern } ) {
 }
 
 /**
- * Sleeps on specified duration
- * duration the duration to sleep millis
- */
-void sleep( Duration duration ) {
-    var ms = duration.inMilliseconds;
-    var start = DateTime.now( ).millisecondsSinceEpoch;
-    while( true ) {
-        var current = DateTime.now( ).millisecondsSinceEpoch;
-        if( current - start >= ms ) {
-            break;
-        }
-    }
-}
-
-/**
  * Creates file system entity name 
  * dirPath the directory path within current user directory
  * name the meaningful entity name
@@ -149,11 +135,18 @@ class Functions {
     }
 }
 
+enum ListItemState {
+    unselected, // index 0
+    selected   // index 1
+}
+
 /**
  * Generic list item with arbitrary object within
  */
-class ListItem implements Comparable {
-    bool selected = false;
+class ListItem implements Comparable, HasState {
+    bool get selected => _state == ListItemState.selected.index;
+    int _state = ListItemState.unselected.index;
+    String id = "";
     dynamic customData;
 
     ListItem( this.customData );
@@ -166,6 +159,16 @@ class ListItem implements Comparable {
     @override
     String toString( ) {
         return customData.toString( );   
+    }
+    
+    @override
+    int getState( ) => _state;
+
+    @override
+    void setState( int state ) => _state = state;
+
+    void inverse( ) {
+        _state = selected ? ListItemState.unselected.index : ListItemState.selected.index;
     }
 }
 

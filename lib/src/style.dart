@@ -40,7 +40,7 @@ class Style {
             borderRadius: borderRadius
         )
     );
-    static final TextStyle listTileStyle = theme.textTheme.titleMedium!;
+    static final TextStyle listTileStyle = theme.textTheme.titleSmall!;
     static final DividerPainter divPainter = DividerPainters.grooved1( backgroundColor: theme.primaryColor );
     static final TextStyle formFieldStyle = theme.textTheme.bodyMedium!;
     static final TextStyle fieldStyle = theme.textTheme.bodyMedium!;

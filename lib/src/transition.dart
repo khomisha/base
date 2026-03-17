@@ -25,14 +25,14 @@ abstract class TransitionCommand {
 	 * 
 	 * target the transition target object
 	 */
-    void executeBefore( HasState target );
+    Future< void > executeBefore( HasState target );
 
     /**
 	 * Executes some action after transition from one state to another is completed
 	 * 
 	 * target the transition target object
 	 */
-    void executeAfter( HasState target ) {}
+    Future< void > executeAfter( HasState target ) async {}
 }
 
 /** State transition object.
@@ -41,7 +41,7 @@ abstract class TransitionCommand {
  * - columns represent the new (target) state
  * - each cell holds the [TransitionCommand] to execute for that transition
  */
-abstract class Transition {
+class Transition {
     List< List < TransitionCommand > >? _transitionTable;
 
     Transition( );
@@ -59,16 +59,16 @@ abstract class Transition {
         final oldState = target.getState( );
         try {
             final tc = getTransitionCommand( newState, oldState );
-            tc.executeBefore( target );
+            await tc.executeBefore( target );
             target.setState( newState );
-            tc.executeAfter( target );
-            logger.info( '$oldState -> ${target.getState()} success' );
+            await tc.executeAfter( target );
+            //logger.info( '$oldState -> ${target.getState()} success' );
         } 
         on UnsupportedError catch( e ) {
-            logger.severe( '${e.message} — failure to change state: $newState');
+            logger.severe( '${e.message} — failure to change state: $newState' );
         } 
         on ArgumentError catch( e ) {
-            logger.severe( '${e.message} — failure to change state: $newState');
+            logger.severe( '${e.message} — failure to change state: $newState' );
         }
         // FileNotFoundException equivalent: let other exceptions propagate
     }
@@ -95,7 +95,7 @@ class NoCommand extends TransitionCommand {
     NoCommand( );
 
     @override
-    void executeBefore( HasState target ) {}
+    Future< void > executeBefore( HasState target ) async {}
 }
 
 /**
@@ -105,7 +105,7 @@ class WrongCommand extends TransitionCommand {
     WrongCommand( );
 
     @override
-    void executeBefore( HasState target ) {
+     Future< void > executeBefore( HasState target ) {
         throw UnsupportedError( 'Wrong transition' );
     }
 }
