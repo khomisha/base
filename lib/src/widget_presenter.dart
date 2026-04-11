@@ -10,14 +10,20 @@ abstract class WidgetPresenter extends ChangeNotifier implements Subscriber {
     late int editIndex;
     late List< ListItem > _list;
     List< ListItem > get list => _list;
-    late int selectedIndex;
-    set list( List< ListItem > value ) { 
+    int selectedIndex = -1;
+    set list( List< ListItem > value ) {
         _list = value;
         _list.sort( );
-        selectedIndex = _list.isEmpty ? -1 : 0;
-        onSet( );
+        // Adjust selectedIndex only if it was previously set to a valid index that is now out of bounds
+        if( selectedIndex != -1 && selectedIndex >= _list.length ) {
+            selectedIndex = _list.isEmpty ? -1 : 0;
+        }
+        // Set the state of the selected item (if any)
+        if( selectedIndex != -1 && selectedIndex < _list.length ) {
+            _list[ selectedIndex ].setState( ListItemState.selected.index );
+        }
         notifyListeners( );
-    }
+    }    
     bool readOnly = true;
     bool adding = false;
 
