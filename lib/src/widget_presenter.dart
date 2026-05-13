@@ -91,11 +91,18 @@ abstract class WidgetPresenter extends ChangeNotifier implements Subscriber {
             value.sort( );
         } else {
             list[ editIndex ].customData[ attributeName ] = newValue;
+            onUpdate( attributeName, newValue );
         }
         if( notify ) {
             notifyListeners( );
         }
     } 
+
+    /**
+     * On update list item some actions in desendent
+     */
+    void onUpdate( String attributeName, dynamic newValue ) {
+    }
 
     @override
     void onEvent( Event event );
@@ -121,6 +128,9 @@ abstract class WidgetPresenter extends ChangeNotifier implements Subscriber {
     void onSuccess( ) {
     }
 
+    /**
+     * On set list some actions in desendent
+     */
     void onSet( ) {
     }
 }

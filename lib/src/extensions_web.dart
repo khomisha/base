@@ -21,7 +21,7 @@ extension StringListInterop on List< String > {
 }
 
 extension JSArrayInterop on JSArray< JSString > {
-    List<String> toDartStringList( ) {
+    List< String > toDartStringList( ) {
         final list = < String >[ ];
         for( var i = 0; i < length; i++ ) {
             list.add( this[ i ].toDart );

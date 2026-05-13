@@ -178,7 +178,7 @@ class ListItem implements Comparable, HasState {
  */
 void printObjectAsJson( String tag, dynamic jsonObject ) {
     var encoder = const JsonEncoder.withIndent( INDENT );
-    logger.info( Message( tag, encoder.convert( jsonObject ) ) );
+    logger.fine( Message( tag, encoder.convert( jsonObject ) ) );
 }
 
 /**

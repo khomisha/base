@@ -62,7 +62,7 @@ class Transition {
             await tc.executeBefore( target );
             target.setState( newState );
             await tc.executeAfter( target );
-            //logger.info( '$oldState -> ${target.getState()} success' );
+            logger.fine( '$oldState -> ${target.getState()} success' );
         } 
         on UnsupportedError catch( e ) {
             logger.severe( '${e.message} — failure to change state: $newState' );
