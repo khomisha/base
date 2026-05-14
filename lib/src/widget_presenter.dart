@@ -38,17 +38,31 @@ abstract class WidgetPresenter extends ChangeNotifier implements Subscriber {
 
     /**
      * Deletes specified data
-     * index the note data index
+     * index the item data index
      */
-    void delete( int index ) {
+    void delete(int index) {
+        // Remove the item
         _list.removeAt( index );
-        selectedIndex = index >= list.length ? list.length - 1 : index;
+        // Adjust selectedIndex based on what was removed
+        if( selectedIndex == index ) {
+            // The selected item itself was deleted
+            if( _list.isEmpty ) {
+                selectedIndex = -1;
+            } else {
+                // Select the item that now occupies the same index (or the last one)
+                selectedIndex = index < _list.length ? index : _list.length - 1;
+            }
+        } else if( selectedIndex > index ) {
+            // An item before the selected one was deleted -> shift left
+            selectedIndex--;
+        }
+        // Ensure selectedIndex is within bounds (already done)
         onSuccess( );
     }
 
     /**
      * Starts editing specified data
-     * index the data index
+     * index the item data index
      */
     void startEdit( int index ) {
         editIndex = index;
