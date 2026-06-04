@@ -412,27 +412,30 @@ class ChipListField extends StatelessWidget {
     final IsSelected isSelected;
     final OnSelected onSelected;
     final bool showCheckmark;
+    final double scale;
 
-    const ChipListField( 
-        { 
-            super.key, 
-            this.value, 
+    const ChipListField(
+        {
+            super.key,
+            this.value,
             required this.pattern,
             required this.isSelected,
             required this.onSelected,
-            this.showCheckmark = true
-        } 
+            this.showCheckmark = true,
+            this.scale = 1.0
+        }
     );
 
     @override
     Widget build( BuildContext context ) {
-        return ChipList( 
-            text: pattern.label, 
+        return ChipList(
+            text: pattern.label,
             list: value,
-            width: pattern.width, 
+            width: pattern.width,
             isSelected: isSelected,
             onSelected: onSelected,
-            showCheckmark: showCheckmark
+            showCheckmark: showCheckmark,
+            scale: scale
         );
     }
 }
@@ -447,24 +450,27 @@ class ChipList extends StatelessWidget {
     final OnSelected onSelected;
     final bool showCheckmark;
     final String text;
+    final double scale;
 
-    const ChipList( 
-        { 
-            super.key, 
-            required this.text, 
-            required this.list, 
-            this.width = 130, 
-            required this.isSelected, 
-            required this.onSelected, 
-            this.showCheckmark = false 
-        } 
+    const ChipList(
+        {
+            super.key,
+            required this.text,
+            required this.list,
+            this.width = 130,
+            required this.isSelected,
+            required this.onSelected,
+            this.showCheckmark = false,
+            this.scale = 1.0
+        }
     );
 
     Widget _buildList( BuildContext context, int index ) {
         var name = list[ index ].customData.attributes[ 'name' ];
         var filterChip = FilterChip(
             selected: isSelected( name ),
-            label: SizedBox( width: width - 5.0, child: Text( name ) ),
+            label: SizedBox( width: ( width - 5.0 ) * scale, child: Text( name ) ),
+            labelStyle: TextStyle( fontSize: ( Style.listTileStyle.fontSize ?? 14.0 ) * scale ),
             onSelected: ( selected ) {
                 onSelected( list[ index ] );
             },
@@ -473,25 +479,27 @@ class ChipList extends StatelessWidget {
             selectedColor: Style.theme.primaryColor,
             showCheckmark: showCheckmark
         );
-        return Padding( padding: const EdgeInsets.all( 3 ), child: filterChip );
+        return Padding( padding: EdgeInsets.all( 3 * scale ), child: filterChip );
     }
 
     @override
     Widget build( BuildContext context ) {
-        var chipList = ListView.builder( 
-            scrollDirection: Axis.vertical, 
-            itemCount: list.length, 
-            itemBuilder: _buildList 
+        var chipList = ListView.builder(
+            scrollDirection: Axis.vertical,
+            itemCount: list.length,
+            itemBuilder: _buildList
         );
-        var title = Text( text, style: Style.listTileStyle, textAlign: TextAlign.start );
+        var title = Text( text, style: Style.listTileStyle.copyWith(
+            fontSize: ( Style.listTileStyle.fontSize ?? 14.0 ) * scale
+        ), textAlign: TextAlign.start );
         var column = Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [ 
-                Padding( padding: const EdgeInsets.all( 4 ), child: title ), 
-                Expanded( child: chipList ) 
+            children: [
+                Padding( padding: EdgeInsets.all( 4 * scale ), child: title ),
+                Expanded( child: chipList )
             ]
         );
-        return Container( width: width, color: Colors.grey[ 60 ], child: column );
+        return Container( width: width * scale, color: Colors.grey[ 60 ], child: column );
     }
 }
 
