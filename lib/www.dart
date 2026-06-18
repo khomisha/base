@@ -8,6 +8,7 @@ export 'src/data.dart';
 export 'src/panel.dart';
 export 'src/constants.dart';
 export 'src/config.dart';
+export 'src/i18n.dart';
 export 'src/util.dart';
 export 'src/file.dart';
 export 'src/base_components.dart';
